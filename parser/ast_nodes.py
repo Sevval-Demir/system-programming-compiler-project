@@ -4,13 +4,13 @@ class ASTNode:
 
 class ProgramNode(ASTNode):
     def __init__(self, statements):
-        self.statements = statements # Program içindeki tüm satırların listesi
+        self.statements = statements  # Program içindeki tüm satırların listesi
 
 class DeclarationNode(ASTNode):
     def __init__(self, data_type, var_name, line):
         self.data_type = data_type   # 'int' veya 'float'
         self.var_name = var_name     # Değişken adı
-        self.line = line             # İleride semantic analiz için satır bilgisi
+        self.line = line             # Semantic analiz için satır bilgisi
 
 class AssignmentNode(ASTNode):
     def __init__(self, var_name, expr, line):
@@ -59,6 +59,7 @@ class PrintNode(ASTNode):
         self.argument = argument       # Ekrana basılacak ifade (ASTNode)
         self.line = line
 
+
 def export_ast_text(node, level=0):
     """
     AST yapısını hiyerarşik ve girintili bir metin (string) olarak döndürür.
@@ -68,11 +69,8 @@ def export_ast_text(node, level=0):
         return ""
 
     indent = "    " * level
-    # Ağaç dalları gibi görünmesi için şık bir belirteç ekleyelim
     branch = "├── " if level > 0 else ""
     result = ""
-
-    # Düğüm tipine göre şık bir metin üretelim
     node_type = type(node).__name__
 
     if node_type == "ProgramNode":
@@ -84,17 +82,13 @@ def export_ast_text(node, level=0):
         result += f"{indent}{branch}Declaration: {node.data_type} {node.var_name}\n"
 
     elif node_type == "AssignmentNode":
-        result += f"{indent}{branch}Assignment: {node.var_name} =\n"
-        result += export_ast_text(node.expr, level + 1)
+        result += f"{indent}{branch}Assignment: {node.var_name} =\n" + export_ast_text(node.expr, level + 1)
 
     elif node_type == "BinOpNode":
-        result += f"{indent}{branch}BinaryOp: '{node.op_token.value}'\n"
-        result += export_ast_text(node.left, level + 1)
-        result += export_ast_text(node.right, level + 1)
+        result += f"{indent}{branch}BinaryOp: '{node.op_token.value}'\n" + export_ast_text(node.left, level + 1) + export_ast_text(node.right, level + 1)
 
     elif node_type == "UnaryOpNode":
-        result += f"{indent}{branch}UnaryOp: '{node.op_token.value}'\n"
-        result += export_ast_text(node.expr, level + 1)
+        result += f"{indent}{branch}UnaryOp: '{node.op_token.value}'\n" + export_ast_text(node.expr, level + 1)
 
     elif node_type == "LiteralNode":
         result += f"{indent}{branch}Literal: {node.value}\n"
@@ -103,10 +97,7 @@ def export_ast_text(node, level=0):
         result += f"{indent}{branch}Variable: {node.var_name}\n"
 
     elif node_type == "IfNode":
-        result += f"{indent}{branch}IfStatement\n"
-        result += f"{indent}    ├── Condition:\n"
-        result += export_ast_text(node.condition, level + 2)
-        result += f"{indent}    └── ThenBranch:\n"
+        result += f"{indent}{branch}IfStatement\n{indent}    ├── Condition:\n" + export_ast_text(node.condition, level + 2) + f"{indent}    └── ThenBranch:\n"
         for stmt in node.then_branch:
             result += export_ast_text(stmt, level + 3)
         if node.else_branch:
@@ -115,15 +106,11 @@ def export_ast_text(node, level=0):
                 result += export_ast_text(stmt, level + 3)
 
     elif node_type == "WhileNode":
-        result += f"{indent}{branch}WhileLoop\n"
-        result += f"{indent}    ├── Condition:\n"
-        result += export_ast_text(node.condition, level + 2)
-        result += f"{indent}    └── Body:\n"
+        result += f"{indent}{branch}WhileLoop\n{indent}    ├── Condition:\n" + export_ast_text(node.condition, level + 2) + f"{indent}    └── Body:\n"
         for stmt in node.body:
             result += export_ast_text(stmt, level + 3)
 
     elif node_type == "PrintNode":
-        result += f"{indent}{branch}PrintStatement\n"
-        result += export_ast_text(node.argument, level + 1)
+        result += f"{indent}{branch}PrintStatement\n" + export_ast_text(node.argument, level + 1)
 
     return result

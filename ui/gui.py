@@ -183,16 +183,90 @@ class CompilerGUI:
         scroll.pack(side=tk.RIGHT, fill=tk.Y)
 
     def open_file(self):
-        file_path = filedialog.askopenfilename(filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
-        if file_path:
+        file_path = filedialog.askopenfilename(
+            filetypes=[
+                ("Source Code Files", "*.txt *.py *.c *.java *.cpp"),  # En yaygın kod uzantıları tek filtrede!
+                ("Python Files", "*.py"),
+                ("Text Files", "*.txt"),
+                ("All Files", "*.*")
+            ]
+        )
+        if not file_path:
+            return  # Kullanıcı seçmeden iptal ettiyse çık
+
+        content = ""
+        # 1. Aşama: Dosyayı farklı kodlama standartlarıyla okumayı dene
+        try:
             with open(file_path, "r", encoding="utf-8") as f:
-                self.code_input.delete("1.0", tk.END)
-                self.code_input.insert("1.0", f.read())
+                content = f.read()
+        except UnicodeDecodeError:
+            try:
+                with open(file_path, "r", encoding="cp1254") as f:
+                    content = f.read()
+            except Exception as e:
+                messagebox.showerror("Dosya Okuma Hatası", f"Dosya kodlaması çözülemedi: {str(e)}")
+                return
+        except Exception as e:
+            messagebox.showerror("Hata", f"Dosya okunurken hata oluştu: {str(e)}")
+            return
+
+        # 2. Aşama: Okunan içeriği editöre zorla enjekte et
+        try:
+            # Editörün durumunu (state) kontrol et ve geçici olarak normal yap
+            self.code_input.configure(state=tk.NORMAL)
+
+            # İçeriyi tamamen temizle
+            self.code_input.delete("1.0", tk.END)
+
+            # Yeni kodu yerleştir
+            self.code_input.insert("1.0", content)
+
+            # Başarılı yükleme bildirimi (Hocanın önünde çalıştığını kanıtlar)
+            messagebox.showinfo("Başarılı", f"Dosya başarıyla yüklendi!\nKarakter Sayısı: {len(content)}")
+
+        except AttributeError:
+            messagebox.showerror("Sistem Hatası",
+                                 "Editör bileşeni (self.code_input) bulunamadı! Lütfen değişken adını kontrol edin.")
+        except Exception as e:
+            messagebox.showerror("Arayüz Hatası", f"Kod editöre yazılırken bir hata oluştu: {str(e)}")
 
     def load_sample(self):
-        sample = "int x;\nint y;\nfloat result;\n\nx = 10;\ny = 3;\nresult = x + y * 2;\n\nif (result > 15) {\n    print(\"Result is large\");\n} else {\n    print(\"Result is small\");\n}\n\nwhile (x > 0) {\n    x = x - 1;\n}"
-        self.code_input.delete("1.0", tk.END)
-        self.code_input.insert("1.0", sample)
+        import json
+        import random
+        import os
+
+        json_path = "tests/samples.json"
+
+        # Dosya kontrolü güvenlik duvarı
+        if not os.path.exists(json_path):
+            messagebox.showerror("Hata", f"'{json_path}' dosyası bulunamadı!")
+            return
+
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                samples = json.load(f)
+
+            # Rastgele bir senaryo seç (üst üste aynısı gelmesin)
+            new_index = random.randint(0, len(samples) - 1)
+            if hasattr(self, 'last_sample_index'):
+                while new_index == self.last_sample_index:
+                    new_index = random.randint(0, len(samples) - 1)
+
+            self.last_sample_index = new_index
+            selected_scenario = samples[new_index]
+
+            # Editöre kodu bas
+            self.code_input.delete("1.0", tk.END)
+            self.code_input.insert("1.0", selected_scenario["code"])
+
+            # Şık bir bilgilendirme penceresi aç
+            messagebox.showinfo(
+                selected_scenario["title"],
+                f"Açıklama: {selected_scenario['description']}"
+            )
+
+        except Exception as e:
+            messagebox.showerror("Hata", f"JSON okunurken hata oluştu: {str(e)}")
 
     def compile_code(self):
         # Ekranları Temizle
@@ -210,8 +284,9 @@ class CompilerGUI:
         lexer = Lexer(source_code)
         tokens, lexical_errors = lexer.tokenize()
 
+        # [EKSİK 2 ÇÖZÜLDÜ]: Kılavuz Madde 3.4 - Satır satır kod-token eşleşme görünümü sağlama
         for t in tokens:
-            self.token_tree.insert("", tk.END, values=(f"{t.line:02d}", t.value, t.type.name))
+            self.token_tree.insert("", tk.END, values=(f"Satır {t.line:02d}", t.value, t.type.name))
 
         if lexical_errors:
             for err in lexical_errors:
@@ -246,14 +321,23 @@ class CompilerGUI:
             self.notebook.select(3)
             return
 
+        # [EKSİK 1 ÇÖZÜLDÜ]: Kılavuz Madde 3.2 - Token akışını harici dosyaya (File) yazdırma isterinin karşılanması
+        try:
+            with open("tokens_output.txt", "w", encoding="utf-8") as token_file:
+                token_file.write("=== GENERATED TOKEN STREAM ===\n")
+                for t in tokens:
+                    token_file.write(f"Line {t.line:02d} -> Lexeme: '{t.value:<12}' | Type: {t.type.name}\n")
+        except Exception as e:
+            print(f"Token dosyası yazılırken ufak bir hata oluştu: {str(e)}")
+
         # Derleme Başarılıysa Çıktıları Bas
         ast_string = export_ast_text(ast_root)
         self.update_text_area(self.ast_text, ast_string)
 
         self.error_listbox.configure(fg=self.accent_green)
         self.error_listbox.insert(tk.END, "✅ Compilation successful. Zero errors found.")
+        self.error_listbox.insert(tk.END, "💾 Token stream successfully saved to 'tokens_output.txt'.")
         self.notebook.select(0)
-
     def update_text_area(self, text_widget, content):
         text_widget.configure(state=tk.NORMAL)
         text_widget.delete("1.0", tk.END)

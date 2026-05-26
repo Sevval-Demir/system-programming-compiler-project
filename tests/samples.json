@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "title": "Senaryo 1: Hatasız Klasik Program",
+    "description": "Değişken tanımlamaları, operatör öncelikli matematik, if/else ve while döngüsü içerir.",
+    "code": "int x;\nint y;\nfloat result;\n\nx = 10;\ny = 3;\nresult = x + y * 2;\n\nif (result > 15 && x >= 10) {\n    print(\"Result is large\");\n} else {\n    print(\"Result is small\");\n}\n\nwhile (x > 0) {\n    x = x - 1;\n}\n\nprint(result);"
+  },
+  {
+    "id": 2,
+    "title": "Senaryo 2: Hatasız Float ve Mantıksal Operatör Programı",
+    "description": "Gelişmiş float bölme işlemi ve '||' (VEYA) mantıksal operatör kontrolünü test eder.",
+    "code": "float a;\nfloat b;\nint check;\n\na = 5.5;\nb = 2.0;\ncheck = 1;\n\nif (a / b > 2.5 || check == 1) {\n    print(\"Matematiksel kosul saglandi\");\n}\nprint(a);"
+  },
+  {
+    "id": 3,
+    "title": "Senaryo 3: Sözcük (Lexical) Hatası Test Senaryosu",
+    "description": "Geçersiz karakter (@) ve bozuk float literal formatı içerir.",
+    "code": "int x;\nfloat y;\nx = 5 @ 2;\ny = 12.3.4;"
+  },
+  {
+    "id": 4,
+    "title": "Senaryo 4: Sözdizim (Syntax) Hatası Test Senaryosu",
+    "description": "Eksik noktalı virgül (;) ve kapatılmamış parantez hatalarını simüle eder.",
+    "code": "int x\nint y;\nx = 5;\nif (x > 0 {\n    print(\"Parantez kapanmadi\");\n}"
+  },
+  {
+    "id": 5,
+    "title": "Senaryo 5: Anlamsal (Semantic) Hata Test Senaryosu",
+    "description": "Tanımlanmamış değişken kullanımı ve sayısal değişkene string atama hatasını test eder.",
+    "code": "int score;\nscore = 85;\ntotal = score + 10;\n\nfloat pi;\npi = \"3.14\";"
+  }
+]

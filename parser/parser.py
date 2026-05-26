@@ -12,6 +12,9 @@ class Parser:
         self.errors = []  # Sözdizim (Syntax) hatalarını burada toplayacağız
 
     def get_current_token(self):
+        # Güvenli erişim: Token listesinin dışına taşmayı engeller
+        if self.position >= len(self.tokens):
+            return self.tokens[-1]
         return self.tokens[self.position]
 
     def consume(self, token_type, error_message):
@@ -22,7 +25,6 @@ class Parser:
             return current
         else:
             self.errors.append(f"Line {current.line}: Syntax Error - {error_message}. Found '{current.value}'")
-            # Derleyicinin çöküp durmaması, sonraki hataları da bulabilmesi için sanal ilerleme yapıyoruz
             if current.type != TokenType.EOF:
                 self.position += 1
             return current
@@ -62,7 +64,7 @@ class Parser:
     def parse_declaration_stmt(self):
         """BNF: <DeclarationStmt> ::= <Type> IDENTIFIER ";" """
         type_token = self.get_current_token()
-        self.position += 1  # Tipi geç (int/float)
+        self.position += 1
 
         var_token = self.consume(TokenType.IDENTIFIER, "Expected variable name after type")
         self.consume(TokenType.SEMICOLON, "Expected ';' after variable declaration")
@@ -72,7 +74,7 @@ class Parser:
     def parse_assignment_stmt(self):
         """BNF: <AssignmentStmt> ::= IDENTIFIER "=" <Expression> ";" """
         var_token = self.get_current_token()
-        self.position += 1  # Değişkeni geç
+        self.position += 1
 
         self.consume(TokenType.ASSIGN, "Expected '=' after variable name")
         expr = self.parse_expression()
@@ -82,7 +84,7 @@ class Parser:
 
     def parse_if_stmt(self):
         """BNF: <IfStmt> ::= "if" "(" <Condition> ")" "{" <StatementList> "}" <ElsePart> """
-        self.position += 1  # 'if' kelimesini geç
+        self.position += 1
         self.consume(TokenType.LPAREN, "Expected '(' after 'if'")
         condition = self.parse_condition()
         self.consume(TokenType.RPAREN, "Expected ')' after condition")
@@ -96,7 +98,7 @@ class Parser:
 
         else_statements = None
         if self.get_current_token().type == TokenType.KEYWORD and self.get_current_token().value == "else":
-            self.position += 1  # 'else' kelimesini geç
+            self.position += 1
             self.consume(TokenType.LBRACE, "Expected '{' to start 'else' block")
             else_statements = []
             while self.get_current_token().type != TokenType.RBRACE and self.get_current_token().type != TokenType.EOF:
@@ -108,7 +110,7 @@ class Parser:
 
     def parse_while_stmt(self):
         """BNF: <WhileStmt> ::= "while" "(" <Condition> ")" "{" <StatementList> "}" """
-        self.position += 1  # 'while' kelimesini geç
+        self.position += 1
         self.consume(TokenType.LPAREN, "Expected '(' after 'while'")
         condition = self.parse_condition()
         self.consume(TokenType.RPAREN, "Expected ')' after condition")
@@ -125,10 +127,9 @@ class Parser:
     def parse_print_stmt(self):
         """BNF: <PrintStmt> ::= "print" "(" <PrintArgument> ")" ";" """
         print_token = self.get_current_token()
-        self.position += 1  # 'print' kelimesini geç
+        self.position += 1
         self.consume(TokenType.LPAREN, "Expected '(' after 'print'")
 
-        # Argüman string mi yoksa matematiksel/değişken bir ifade mi? [cite: 27]
         if self.get_current_token().type == TokenType.STRING_LITERAL:
             argument = LiteralNode(self.get_current_token())
             self.position += 1
@@ -155,15 +156,18 @@ class Parser:
     def parse_simple_condition(self):
         """BNF: <SimpleCondition> ::= <Expression> <RelOp> <Expression> """
         left = self.parse_expression()
-
         rel_ops = (TokenType.EQ, TokenType.NEQ, TokenType.LT, TokenType.GT, TokenType.LTE, TokenType.GTE)
+
         if self.get_current_token().type in rel_ops:
             op_token = self.get_current_token()
             self.position += 1
             right = self.parse_expression()
             return BinOpNode(left, op_token, right)
         else:
+            # DÜZELTİLDİ: Koşul operatörü eksikse imleç güvenli ilerletilir, kilitlenme önlenir
             self.errors.append(f"Line {self.get_current_token().line}: Syntax Error - Expected comparison operator")
+            if self.get_current_token().type != TokenType.EOF:
+                self.position += 1
             return left
 
     def parse_expression(self):
@@ -215,5 +219,6 @@ class Parser:
 
         else:
             self.errors.append(f"Line {token.line}: Syntax Error - Expected number, variable or '('")
-            self.position += 1
+            if token.type != TokenType.EOF:
+                self.position += 1
             return None
