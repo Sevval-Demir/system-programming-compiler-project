@@ -335,8 +335,8 @@ class CompilerGUI:
         self.update_text_area(self.ast_text, ast_string)
 
         self.error_listbox.configure(fg=self.accent_green)
-        self.error_listbox.insert(tk.END, "✅ Compilation successful. Zero errors found.")
-        self.error_listbox.insert(tk.END, "💾 Token stream successfully saved to 'tokens_output.txt'.")
+        self.error_listbox.insert(tk.END, " Compilation successful. Zero errors found.")
+        self.error_listbox.insert(tk.END, " Token stream successfully saved to 'tokens_output.txt'.")
         self.notebook.select(0)
     def update_text_area(self, text_widget, content):
         text_widget.configure(state=tk.NORMAL)
