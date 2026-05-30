@@ -1,37 +1,190 @@
-# Simple Two-Pass Compiler (Mini-Compiler Simulator)
+# Simple Two-Pass Compiler
 
-This repository contains a hand-coded, **Two-Pass Compiler** developed for a subset of a high-level programming language as a Final Project for the **System Programming Course** (Spring 2025-2026).
+A simple two-pass compiler simulator developed in Python as part of the System Programming course project. The compiler was implemented manually without using compiler-generator tools such as Lex, Yacc, Flex, Bison, or ANTLR.
 
+## Features
 
----
+- Lexical Analysis (Lexer)
+- Recursive Descent Parser
+- Abstract Syntax Tree (AST) Generation
+- Symbol Table Management
+- Semantic Analysis
+- Error Detection and Reporting
+- Source File Loading Support
+- Graphical User Interface (Tkinter)
 
-## 🚀 Architectural Overview
-The compiler is designed entirely from scratch **without using any compiler-generator tools** (such as Lex, Yacc, or ANTLR). It processes the source code through a clean, fully-modular pipeline:
+## Supported Language Constructs
 
-1. **Pass 1 - Lexical Analysis (Lexer):** Scans the source code character-by-character, tokenizing constructs into structured keywords, identifiers, literals, and operators. It also handles initial lexical error tracking (e.g., malformed floats, unterminated strings).
-2. **Symbol Table Management:** Maintains an optimized dictionary structure mapping variable names to their simulated 32-bit architectural memory addresses (incrementing by 4 bytes per variable).
-3. **Pass 2 - Syntax Analysis (Parser):** Implements a manual **Recursive Descent Parser** that maps BNF grammar rules to özyinelemeli (recursive) functions, inherently resolving operator precedence.
-4. **Semantic Analysis:** Traverses the generated Abstract Syntax Tree (AST) using a visitor-like pattern to enforce type compatibility, duplicate declaration checks, and undeclared variable detection.
+### Variable Declarations
 
----
+```c
+int x;
+float result;
+```
 
-## 📊 BNF Grammar Definition
+### Assignments
+
+```c
+x = 10;
+result = x + 3.5;
+```
+
+### Arithmetic Expressions
+
+```c
+result = x + y * 2;
+```
+
+Supported operators:
+
 ```text
-<Program>          ::= <StatementList>
-<StatementList>    ::= <Statement> <StatementList> | ε
-<Statement>        ::= <DeclarationStmt> | <AssignmentStmt> | <IfStmt> | <WhileStmt> | <PrintStmt>
-<DeclarationStmt>  ::= <Type> IDENTIFIER ";"
-<Type>             ::= "int" | "float"
-<AssignmentStmt>   ::= IDENTIFIER "=" <Expression> ";"
-<IfStmt>           ::= "if" "(" <Condition> ")" "{" <StatementList> "}" <ElsePart>
-<ElsePart>         ::= "else" "{" <StatementList> "}" | ε
-<WhileStmt>        ::= "while" "(" <Condition> ")" "{" <StatementList> "}"
-<PrintStmt>        ::= "print" "(" <PrintArgument> ")" ";"
-<PrintArgument>    ::= STRING_LITERAL | <Expression>
-<Condition>        ::= <SimpleCondition> | <Condition> <LogicalOp> <SimpleCondition>
-<SimpleCondition>  ::= <Expression> <RelOp> <Expression>
-<LogicalOp>        ::= "&&" | "||"
-<RelOp>            ::= "==" | "!=" | "<" | ">" | "<=" | ">="
-<Expression>       ::= <Term> ( ( "+" | "-" ) <Term> )*
-<Term>             ::= <Factor> ( ( "*" | "/" ) <Factor> )*
-<Factor>           ::= IDENTIFIER | INTEGER_LITERAL | FLOAT_LITERAL | "(" <Expression> ")" | "-" <Factor>
++  -  *  /
+```
+
+### Conditional Statements
+
+```c
+if (x > 5) {
+    print("Large");
+}
+else {
+    print("Small");
+}
+```
+
+### While Loops
+
+```c
+while (x > 0) {
+    x = x - 1;
+}
+```
+
+### Print Statements
+
+```c
+print("Hello");
+print(x);
+```
+
+## Compiler Architecture
+
+```text
+Source Code
+    │
+    ▼
+Lexical Analysis
+    │
+    ▼
+Token Stream
+    │
+    ▼
+Syntax Analysis
+    │
+    ▼
+Abstract Syntax Tree (AST)
+    │
+    ▼
+Semantic Analysis
+    │
+    ▼
+Symbol Table & Error Reports
+```
+
+## Project Structure
+
+```text
+compiler_project/
+│
+├── lexer/
+│   ├── lexer.py
+│   ├── token.py
+│   └── symbol_table.py
+│
+├── parser/
+│   ├── parser.py
+│   ├── ast_nodes.py
+│   └── semantic_analyzer.py
+│
+├── tests/
+│   ├── sample_program
+│   └── samples.json
+│
+├── ui/
+│   └── gui.py
+│
+├── main.py
+├── README.md
+└── tokens_output.txt
+```
+
+## Running the Project
+
+Make sure Python 3 is installed.
+
+```bash
+python main.py
+```
+
+The graphical user interface will start automatically.
+
+## Error Detection
+
+### Lexical Errors
+
+- Invalid characters
+- Malformed numeric literals
+- Unterminated string literals
+- Unsupported operators
+
+### Syntax Errors
+
+- Missing semicolons
+- Missing parentheses
+- Invalid statements
+- Invalid expressions
+
+### Semantic Errors
+
+- Duplicate declarations
+- Undeclared variables
+- Type mismatches
+
+## Example Program
+
+```c
+int x;
+int y;
+float result;
+
+x = 10;
+y = 3;
+
+result = x + y * 2;
+
+if (result > 15) {
+    print("Result is large");
+}
+else {
+    print("Result is small");
+}
+
+print(result);
+```
+
+## Technologies Used
+
+- Python 3
+- Tkinter
+- Object-Oriented Programming
+- Recursive Descent Parsing
+- Abstract Syntax Trees (AST)
+
+## Author
+
+Şevval Demir
+
+Computer Engineering Department  
+İstanbul Health and Technology University
+
+System Programming Course Project
