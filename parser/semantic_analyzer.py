@@ -44,7 +44,7 @@ class SemanticAnalyzer:
 
         expr_type = self.visit(node.expr)
 
-        # DÜZELTİLDİ: Katı tip güvenliği sağlandı. Hem int<-float hem de sayısal değişkenlere string ataması engellendi!
+        # Katı tip güvenliği sağlandı. Hem int<-float hem de sayısal değişkenlere string ataması engellendi!
         if var_symbol.type == "int" and expr_type == "float":
             self.errors.append(
                 f"Line {node.line}: Semantic Error - Type mismatch. Cannot assign float value to int variable '{node.var_name}'."

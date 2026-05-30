@@ -14,7 +14,7 @@ class TokenType(Enum):
     ASSIGN = auto()  # =
     PLUS = auto()  # +
     MINUS = auto()  # -
-    MAIN_MUL = auto()  # * (Dahili Python adıyla çakışmaması için şık isim)
+    MAIN_MUL = auto()  # * (Dahili Python adıyla çakışmaması için isim)
     MUL = auto()
     DIV = auto()  # /
 

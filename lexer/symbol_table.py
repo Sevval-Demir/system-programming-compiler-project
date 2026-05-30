@@ -12,7 +12,7 @@ class Symbol:
 class SymbolTable:
     def __init__(self):
         self.symbols = {}
-        # Bellek adreslerini jüriye daha gerçekçi göstermek için 1000'den başlatıyoruz
+        # Bellek adreslerini jüriye daha gerçekçi göstermek için 1000'den başlatılır
         self.current_address = 1000
 
     def insert(self, name: str, type_: str, scope: str = "global") -> bool:

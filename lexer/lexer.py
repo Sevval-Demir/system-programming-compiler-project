@@ -202,7 +202,7 @@ class Lexer:
                     self.advance(); self.advance()
                     tokens.append(Token(TokenType.AND, "&&", self.line))
                 else:
-                    # DÜZELTİLDİ: Tek başına olan '&' karakteri hatasından sonra imleç tamamen tüketiliyor
+                    # Tek başına olan '&' karakteri hatasından sonra imleç tamamen tüketiliyor
                     self.errors.append(f"Line {self.line}: Invalid character '&'")
                     tokens.append(Token(TokenType.ERROR, "&", self.line))
                     self.advance()
@@ -213,7 +213,7 @@ class Lexer:
                     self.advance(); self.advance()
                     tokens.append(Token(TokenType.OR, "||", self.line))
                 else:
-                    # DÜZELTİLDİ: Tek başına olan '|' karakteri hatasından sonra imleç tamamen tüketiliyor
+                    # Tek başına olan '|' karakteri hatasından sonra imleç tamamen tüketiliyor
                     self.errors.append(f"Line {self.line}: Invalid character '|'")
                     tokens.append(Token(TokenType.ERROR, "|", self.line))
                     self.advance()
